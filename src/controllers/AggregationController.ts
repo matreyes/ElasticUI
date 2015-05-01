@@ -49,7 +49,7 @@ module elasticui.controllers {
             var res = this.scope.indexVM.results;
             if (this.scope.aggregation.agg && res && res.aggregations) {
                 var name = AggregationController.getAggName(this.scope.aggregation.agg);
-                
+
                 var aggKey = Object.keys(res.aggregations).filter(key => key == name || key == "filtered_" + name)[0];
                 var agg = res.aggregations[aggKey];
                 if (aggKey == "filtered_" + name) {
@@ -84,8 +84,20 @@ module elasticui.controllers {
 
             var facetFilters = filters;
             if (!filterSelf) {
+
+                var aggfield;
+
+                if(typeof ejsAggregation.field === "undefined"){
+                  var first;
+                  for (first in ejsAggregation.toJSON()) break;
+                  aggfield = ejsAggregation.agg()[first]["terms"]["field"]
+                }else{
+                  aggfield = ejsAggregation.field()
+                }
+
+
                 facetFilters = facetFilters.filter(
-                    (val) => val != (<any>this.scope).combinedFilter && (typeof val.field === "undefined" || val.field() != ejsAggregation.field()));
+                    (val) => val != (<any>this.scope).combinedFilter && (typeof val.field === "undefined" || val.field() != aggfield));
             }
 
             var combinedFilters = util.FilterTool.combineFilters(facetFilters);

@@ -521,7 +521,17 @@ var elasticui;
                 }
                 var facetFilters = filters;
                 if (!filterSelf) {
-                    facetFilters = facetFilters.filter(function (val) { return val != _this.scope.combinedFilter && (typeof val.field === "undefined" || val.field() != ejsAggregation.field()); });
+                    var aggfield;
+                    if (typeof ejsAggregation.field === "undefined") {
+                        var first;
+                        for (first in ejsAggregation.toJSON())
+                            break;
+                        aggfield = ejsAggregation.agg()[first]["terms"]["field"];
+                    }
+                    else {
+                        aggfield = ejsAggregation.field();
+                    }
+                    facetFilters = facetFilters.filter(function (val) { return val != _this.scope.combinedFilter && (typeof val.field === "undefined" || val.field() != aggfield); });
                 }
                 var combinedFilters = elasticui.util.FilterTool.combineFilters(facetFilters);
                 if (combinedFilters != null) {
